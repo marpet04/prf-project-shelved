@@ -119,8 +119,39 @@ router.delete('/users/:username', getUser, async (req, res) => {
   }
 });
 
-/*
-router.post('/book', async (req, res) => {
+
+//BOOKS
+// GET /books - az összes könyv visszaadása         --> READ
+router.get('/books', async (req, res) => {
+  try {
+    const books = await Book.find();
+    res.status(200).json(books);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+async function getBook(req, res, next) {
+  try {
+    book = await Book.findOne({ bookId: req.params.bookId});
+    if (book == null) {
+      return res.status(404).json({ message: 'A könyv nem található' });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+
+  res.book = book;
+  next();
+}
+
+// GET /books/:bookId - egy felhasználó lekérdezése a bookId alapján     --> READ
+router.get('/books/:bookId', getBook, (req, res) => {
+  res.json(res.book);
+});
+
+// POST /books - új könyv létrehozása         --> CREATE
+router.post('/books', async (req, res) => {
   const book = new Book({
     bookId: 'null',
     author: req.body.author,
@@ -140,16 +171,31 @@ router.post('/book', async (req, res) => {
   }
 });
 
-router.get('/book', async (req, res) => {
+// PATCH /books - meglévő könyv módosítása bookId alapján       --> UPDATE
+router.patch('/books/:bookId', getBook, async (req, res) => {
+  if (req.body.bookId != null) {
+    res.book.bookId = req.body.bookId;
+  }
+  if (req.body.author != null) {
+    res.book.author = req.body.author;
+  }
+  if (req.body.title != null) {
+    res.book.title = req.body.title;
+  }
+  if (req.body.genre != null) {
+    res.book.genre = req.body.genre;
+  }
+  if (req.body.publicationYear != null) {
+    res.book.publicationYear = req.body.publicationYear;
+  }
+
   try {
-    const books = await Book.find();
-    res.status(200).json(books);
+    const updatedBook = await res.book.save();
+    res.json(updatedBook);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 });
 
-/* Ha egy fájl require-el behivatkozza ezt a fájlt, akkor a hivatkozás helyére a module.exports-ban megadott objektum, funkció 
-vagy változó fog bekerülni */
 
 module.exports = router;
