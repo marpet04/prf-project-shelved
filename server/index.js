@@ -9,7 +9,12 @@ const expressSession = require('express-session');
 const app = express();
 const port = 3000;
 
-mongoose.connect('mongodb+srv://admin:kiscica@prf-project-cluster.sp9g2fx.mongodb.net/?retryWrites=true&w=majority', {
+//mongoose.connect('mongodb+srv://admin:kiscica@prf-project-cluster.sp9g2fx.mongodb.net/?retryWrites=true&w=majority', {
+//  useNewUrlParser: true,
+//  useUnifiedTopology: true,
+//});
+
+mongoose.connect('mongodb://localhost:27017/mydatabase', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -24,12 +29,10 @@ const User = require('./db/userSchema');
 const Book = require('./db/bookSchema');
 const Shelf = require('./db/shelfSchema');
 require('./db/bootstrapper')();
+require('./db/bootstrapper-book')();
 
-/*const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());*/
 
 
 passport.use('local', new localStrategy(function (username, password, done) {
@@ -59,8 +62,6 @@ app.use(expressSession({ secret: 'prf2021lassananodejsvegereerunk', resave: true
 app.use(passport.initialize());
 app.use(passport.session());
 
-const users = [{ name: 'Laca' }];
-
 const whiteList = ['*'];
 const corsOptions = {
     origin: (origin, callback) => {
@@ -75,10 +76,6 @@ const corsOptions = {
 app.use(bodyParser.json());
 app.use(cors());
 
-app.get('/hello', (req, res) => {
-    res.json({ message: 'Hello World!' });
-});
-
 app.get('/api/users', (req, res) => {
     res.json(users);
 });
@@ -90,16 +87,7 @@ app.post('/api/user', (req, res) => {
     res.json("user addedd");
 });
 
-/* app.get('/', (req, res, next) => {
-    next();
-}); */
-
 app.use('/', require('./routes'));
-
-/* app.use((req, res, next) => {
-    console.log('404');
-    res.status(404).send('Error: 404 Page Not Found!');
-}); */
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
