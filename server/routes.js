@@ -33,20 +33,40 @@ router.route('/logout').post((req, res, next) => {
   } else {
     return res.status(403).send('Nem is volt bejelentkezve');
   }
-})
+});
+
+// POST /register - regisztráció
+router.post('/register', async (req, res) => {
+  const user = new User({
+    username: req.body.username,
+    password: req.body.password,
+    accessLevel: req.body.accessLevel,
+    birthDate: req.body.birthDate,
+  });
+
+  try {
+    const newUser = await user.save();
+    res.status(201).send('Sikeres regisztráció, kérem lépjen be!');
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
 
 //Kezelt modellek CRUD
 //USER
 // GET /users - összes felhasználó lekérdezése    - READ
 router.get('/users', async (req, res) => {
-  try {
-    const users = await User.find();
-    res.status(200).json(users);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  if (req.isAuthenticated()) {
+    try {
+      const users = await User.find();
+      res.status(200).json(users);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  } else {
+    return res.status(403).send('Ehhez a művelethez be kell jelentkezni!');
   }
 });
-
 
 async function getUser(req, res, next) {
   try {
@@ -64,70 +84,90 @@ async function getUser(req, res, next) {
 
 // GET /users/:username - egy felhasználó lekérdezése a username alapján     --> READ
 router.get('/users/:username', getUser, (req, res) => {
-  res.json(res.user);
+  if (req.isAuthenticated()) {
+    res.json(res.user);
+  } else {
+    return res.status(403).send('Ehhez a művelethez be kell jelentkezni!');
+  }
 });
 
 
 // POST /users - új felhasználó létrehozása      --> CREATE
 router.post('/users', async (req, res) => {
-  const user = new User({
-    username: req.body.username,
-    password: req.body.password,
-    accessLevel: req.body.accessLevel,
-    birthDate: req.body.birthDate,
-  });
-
-  try {
-    const newUser = await user.save();
-    res.status(201).json(newUser);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+  if (req.isAuthenticated()) {
+    const user = new User({
+      username: req.body.username,
+      password: req.body.password,
+      accessLevel: req.body.accessLevel,
+      birthDate: req.body.birthDate,
+    });
+  
+    try {
+      const newUser = await user.save();
+      res.status(201).json(newUser);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  } else {
+    return res.status(403).send('Ehhez a művelethez be kell jelentkezni!');
   }
 });
 
 // PATCH /users/:username - egy felhasználó frissítése a username alapján    --> UPDATE
 router.patch('/users/:username', getUser, async (req, res) => {
-  if (req.body.username != null) {
-    res.user.username = req.body.username;
-  }
-  if (req.body.password != null) {
-    res.user.password = req.body.password;
-  }
-  if (req.body.accessLevel != null) {
-    res.user.accessLevel = req.body.accessLevel;
-  }
-  if (req.body.birthDate != null) {
-    res.user.birthDate = req.body.birthDate;
-  }
-
-  try {
-    const updatedUser = await res.user.save();
-    res.json(updatedUser);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
+  if (req.isAuthenticated()) {
+    if (req.body.username != null) {
+      res.user.username = req.body.username;
+    }
+    if (req.body.password != null) {
+      res.user.password = req.body.password;
+    }
+    if (req.body.accessLevel != null) {
+      res.user.accessLevel = req.body.accessLevel;
+    }
+    if (req.body.birthDate != null) {
+      res.user.birthDate = req.body.birthDate;
+    }
+  
+    try {
+      const updatedUser = await res.user.save();
+      res.json(updatedUser);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  } else {
+    return res.status(403).send('Ehhez a művelethez be kell jelentkezni!');
+  }  
 });
 
 
 // DELETE /users/:username - egy felhasználó törlése a username alapján    --> DELETE
 router.delete('/users/:username', getUser, async (req, res) => {
-  try {
-    await res.user.remove();
-    res.json({ message: 'A felhasználó sikeresen törölve!' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  if (req.isAuthenticated()) {
+    try {
+      await res.user.remove();
+      res.json({ message: 'A felhasználó sikeresen törölve!' });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  } else {
+    return res.status(403).send('Ehhez a művelethez be kell jelentkezni!');
   }
+  
 });
-
 
 //BOOKS
 // GET /books - az összes könyv visszaadása         --> READ
 router.get('/books', async (req, res) => {
-  try {
-    const books = await Book.find();
-    res.status(200).json(books);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  if (req.isAuthenticated()) {
+    try {
+      const books = await Book.find();
+      res.status(200).json(books);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  } else {
+    return res.status(403).send('Ehhez a művelethez be kell jelentkezni!');
   }
 });
 
@@ -147,53 +187,79 @@ async function getBook(req, res, next) {
 
 // GET /books/:bookId - egy felhasználó lekérdezése a bookId alapján     --> READ
 router.get('/books/:bookId', getBook, (req, res) => {
-  res.json(res.book);
+  if (req.isAuthenticated()) {
+    res.json(res.book);
+  } else {
+    return res.status(403).send('Ehhez a művelethez be kell jelentkezni!');
+  }
 });
 
 // POST /books - új könyv létrehozása         --> CREATE
 router.post('/books', async (req, res) => {
-  const book = new Book({
-    bookId: 'null',
-    author: req.body.author,
-    title: req.body.title
-  });
-
-  if (req.body.genre || req.body.publicationYear) {
-    book.genre = req.body.genre,
-    book.publicationYear = req.body.publicationYear
-  }
-
-  try {
-    const newBook = await book.save();
-    res.status(201).json(newBook);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+  if (req.isAuthenticated()) {
+    const book = new Book({
+      bookId: '',
+      author: req.body.author,
+      title: req.body.title
+    });
+  
+    if (req.body.genre || req.body.publicationYear) {
+      book.genre = req.body.genre,
+      book.publicationYear = req.body.publicationYear
+    }
+  
+    try {
+      const newBook = await book.save();
+      res.status(201).json(newBook);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  } else {
+    return res.status(403).send('Ehhez a művelethez be kell jelentkezni!');
   }
 });
 
 // PATCH /books - meglévő könyv módosítása bookId alapján       --> UPDATE
 router.patch('/books/:bookId', getBook, async (req, res) => {
-  if (req.body.bookId != null) {
-    res.book.bookId = req.body.bookId;
+  if (req.isAuthenticated()) {
+    if (req.body.bookId != null) {
+      res.book.bookId = req.body.bookId;
+    }
+    if (req.body.author != null) {
+      res.book.author = req.body.author;
+    }
+    if (req.body.title != null) {
+      res.book.title = req.body.title;
+    }
+    if (req.body.genre != null) {
+      res.book.genre = req.body.genre;
+    }
+    if (req.body.publicationYear != null) {
+      res.book.publicationYear = req.body.publicationYear;
+    }
+  
+    try {
+      const updatedBook = await res.book.save();
+      res.json(updatedBook);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  } else {
+    return res.status(403).send('Ehhez a művelethez be kell jelentkezni!');
   }
-  if (req.body.author != null) {
-    res.book.author = req.body.author;
-  }
-  if (req.body.title != null) {
-    res.book.title = req.body.title;
-  }
-  if (req.body.genre != null) {
-    res.book.genre = req.body.genre;
-  }
-  if (req.body.publicationYear != null) {
-    res.book.publicationYear = req.body.publicationYear;
-  }
+});
 
-  try {
-    const updatedBook = await res.book.save();
-    res.json(updatedBook);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+// DELETE /books/:bookId - egy könyv törlése a bookId alapján    --> DELETE
+router.delete('/books/:bookId', getBook, async (req, res) => {
+  if (req.isAuthenticated()) {
+    try {
+      await res.book.remove();
+      res.json({ message: 'A könyv sikeresen törölve!' });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  } else {
+    return res.status(403).send('Ehhez a művelethez be kell jelentkezni!');
   }
 });
 
