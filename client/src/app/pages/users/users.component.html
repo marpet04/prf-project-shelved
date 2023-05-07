@@ -1,0 +1,44 @@
+<div>
+    <mat-card class="example-card" *ngFor="let item of this.userList">
+        <mat-card-header>
+          <mat-card-title>{{item.username}}</mat-card-title>
+          <mat-card-subtitle>{{item.birthDate}}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+            <mat-accordion>
+                <mat-expansion-panel>
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    Adatok módosítása
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                <form [formGroup]="editProfile" (ngSubmit)="editProfileData(item.username)">
+                <h1><b>Felhasználói adatok szerkesztése:</b></h1>
+                    <mat-form-field>
+                        <mat-label for="birthDate">Születési idő: </mat-label>
+                        <input matInput type="text" formControlName="birthDate" >
+                    </mat-form-field>
+                    <mat-form-field>
+                        <mat-label for="accessLevel">Hozzáférési szint: </mat-label>
+                        <input matInput type="number" formControlName="accessLevel" >
+                    </mat-form-field>
+                    <div>
+                        <span class="buttons">
+                            <button mat-raised-button color="primary" type="submit">Módosítás</button>
+                        </span>
+                    </div>
+                </form>
+              </mat-expansion-panel>
+            </mat-accordion>
+        </mat-card-content>
+        
+        <mat-card-actions>
+            <button mat-raised-button color="warn" (click)="deleteProfile(item.username)">Törlés</button>
+        </mat-card-actions>
+    </mat-card>
+    
+</div>
+
+
+
+

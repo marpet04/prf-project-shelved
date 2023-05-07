@@ -1,0 +1,14 @@
+<mat-toolbar>
+    <span>Shelved</span>
+    <span class="spacer"></span>
+    <button mat-button [routerLink]="['/main/books']">
+        Könyvek
+    </button>
+    <button mat-button [routerLink]="['/main/admin']">
+        Admin
+    </button>
+    <button mat-button (click)="logout()">
+       Kijelentkezés
+    </button>
+</mat-toolbar>
+<router-outlet></router-outlet>
