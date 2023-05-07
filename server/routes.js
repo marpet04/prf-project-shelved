@@ -12,11 +12,11 @@ router.route('/login').post((req, res, next) => {
       if (error) return res.status(500).send(error);
       req.login(user, function (error) {
         if (error) return res.status(500).send(error);
-        return res.status(200).send('Bejelentkezes sikeres');
+        return res.status(200).send(JSON.stringify('Bejelentkezes sikeres'));
       })
     }) (req, res, next);
   } else {
-    return res.status(400).send('Hibas keres, username es password kell');
+    return res.status(400).send(JSON.stringify('Hibas keres, username es password kell'));
   }
 });
 
@@ -26,12 +26,12 @@ router.route('/logout').post((req, res, next) => {
     req.logout((err) => {
       if(err) {
         console.log('Hiba a kijelentkezés során');
-        return res.status(500).send(err)
+        return res.status(500).send(JSON.stringify(err))
       }
-      return res.status(200).send('Kijelentkezes sikeres');
+      return res.status(200).send(JSON.stringify('Kijelentkezes sikeres'));
     });
   } else {
-    return res.status(403).send('Nem is volt bejelentkezve');
+    return res.status(403).send(JSON.stringify('Nem is volt bejelentkezve'));
   }
 });
 
@@ -94,7 +94,7 @@ router.get('/users/:username', getUser, (req, res) => {
 
 // POST /users - új felhasználó létrehozása      --> CREATE
 router.post('/users', async (req, res) => {
-  if (req.isAuthenticated()) {
+  if (req.isAuthenticated() && req.session.passport.user.accessLevel == 3) {
     const user = new User({
       username: req.body.username,
       password: req.body.password,
@@ -113,8 +113,8 @@ router.post('/users', async (req, res) => {
   }
 });
 
-// PATCH /users/:username - egy felhasználó frissítése a username alapján    --> UPDATE
-router.patch('/users/:username', getUser, async (req, res) => {
+// PUT /users/:username - egy felhasználó frissítése a username alapján    --> UPDATE
+router.put('/users/:username', getUser, async (req, res) => {
   if (req.isAuthenticated()) {
     if (req.body.username != null) {
       res.user.username = req.body.username;
@@ -131,7 +131,7 @@ router.patch('/users/:username', getUser, async (req, res) => {
   
     try {
       const updatedUser = await res.user.save();
-      res.json(updatedUser);
+      res.status(200).json(updatedUser);
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
@@ -169,7 +169,8 @@ router.get('/books', async (req, res) => {
   } else {
     return res.status(403).send('Ehhez a művelethez be kell jelentkezni!');
   }
-});
+}
+);
 
 async function getBook(req, res, next) {
   try {
@@ -219,8 +220,8 @@ router.post('/books', async (req, res) => {
   }
 });
 
-// PATCH /books - meglévő könyv módosítása bookId alapján       --> UPDATE
-router.patch('/books/:bookId', getBook, async (req, res) => {
+// PUT /books - meglévő könyv módosítása bookId alapján       --> UPDATE
+router.put('/books/:bookId', getBook, async (req, res) => {
   if (req.isAuthenticated()) {
     if (req.body.bookId != null) {
       res.book.bookId = req.body.bookId;
