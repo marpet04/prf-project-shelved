@@ -3,12 +3,13 @@
 Ez a projekt az SZTE Programrendszerek fejlesztése c. kurzusra készült. Ez egy olyan applikáció, ami 2 típusú felhasználót enged: admin (accessLevel: 3) és user (accessLevel: 1).
 
 ## Lokális indítás először
+Külön kell indítani mind a kettőt
 ### Szerver
 npm install
 node index.js
 3000-es porton indul
 
-###Kliens
+### Kliens
 npm install
 ng serve --proxy-config proxy.conf.json
 4200-as porton indul
