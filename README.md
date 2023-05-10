@@ -6,10 +6,12 @@ Ez a projekt az SZTE Programrendszerek fejlesztése c. kurzusra készült. Ez eg
 ### Szerver
 npm install
 node index.js
+3000-es porton indul
 
 ###Kliens
 npm install
 ng serve --proxy-config proxy.conf.json
+4200-as porton indul
 
 ## A login képernyő
 
